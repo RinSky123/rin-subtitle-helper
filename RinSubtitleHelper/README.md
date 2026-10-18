@@ -80,7 +80,7 @@
 
    | 系统 | 目录 |
    |---|---|
-   | Windows | `%APPDATA%\Adobe\CEP\extensions\` |
+   | Windows | `C:\Program Files\Common Files\Adobe\CEP\extensions\`（**需要管理员权限**） |
    | macOS | `~/Library/Application Support/Adobe/CEP/extensions/` |
 
    复制完的层级必须是 `extensions\RinSubtitleHelper\CSXS\manifest.xml`，**不能多套一层**。
