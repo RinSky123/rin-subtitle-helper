@@ -78,7 +78,7 @@ by **RinSky123**
 
 1. 下载 [最新 Release](../../releases/latest) 里的 zip，解压得到 `RinSubtitleHelper` 文件夹；
 2. 把它复制到：
-   - **Windows**：`%APPDATA%\Adobe\CEP\extensions\`
+   - **Windows**：`C:\Program Files\Common Files\Adobe\CEP\extensions\`（**需要管理员权限**，复制时会弹 UAC）
    - **macOS**：`~/Library/Application Support/Adobe/CEP/extensions/`
 3. 开启调试模式（未签名扩展必须开，否则菜单里看不到）：
 
