@@ -1,10 +1,20 @@
 ﻿# =====================================================================
 #  Rin字幕效果助手 — 一键安装（Windows）
-#  用法：右键「使用 PowerShell 运行」，或在 PowerShell 里执行
-#        powershell -ExecutionPolicy Bypass -File install.ps1
+#  用法：以【管理员身份】打开 PowerShell，然后执行
+#        powershell -ExecutionPolicy Bypass -File tools\install.ps1
 # =====================================================================
 
 $ErrorActionPreference = "Stop"
+
+# 目标目录在 Program Files 下，必须管理员权限才能写入
+$isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+if (-not $isAdmin) {
+    Write-Host ""
+    Write-Host "[x] 写入 Program Files 需要管理员权限。" -ForegroundColor Red
+    Write-Host "    请用「以管理员身份运行」打开 PowerShell，再执行本脚本。" -ForegroundColor Red
+    Write-Host ""
+    exit 1
+}
 
 $extName = "RinSubtitleHelper"
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -16,7 +26,7 @@ if (-not (Test-Path $src)) {
     exit 1
 }
 
-$destRoot = Join-Path $env:APPDATA "Adobe\CEP\extensions"
+$destRoot = Join-Path $env:ProgramFiles "Common Files\Adobe\CEP\extensions"
 $dest = Join-Path $destRoot $extName
 
 Write-Host ""
