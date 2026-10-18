@@ -1,0 +1,23 @@
+# 系统 / 编辑器
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*~
+
+# 编辑器目录
+.vscode/
+.idea/
+
+# 打包产物（用 GitHub Releases 发，不进仓库）
+*.zip
+dist/
+
+# 临时 / 本地测试
+*.log
+_smoketest.html
+tmp/
+temp/
+
+# 注意：不要在这里忽略 CSXS/ 或 client/ 里的任何东西 ——
+# 这个扩展本身就是靠这些文件运行的，少一个都装不上。
