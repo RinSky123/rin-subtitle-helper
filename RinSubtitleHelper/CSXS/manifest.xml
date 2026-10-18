@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ExtensionManifest ExtensionBundleId="com.rinsky123.rinsubtitle"
+                   ExtensionBundleVersion="0.33.0"
+                   Version="7.0"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <ExtensionList>
+    <Extension Id="com.rinsky123.rinsubtitle.panel" Version="0.33.0" />
+  </ExtensionList>
+
+  <ExecutionEnvironment>
+    <HostList>
+      <!-- AEFT = After Effects; 22.0 - 99.9 覆盖 AE 2022 及以上 -->
+      <Host Name="AEFT" Version="[22.0,99.9]" />
+    </HostList>
+    <LocaleList>
+      <Locale Code="All" />
+    </LocaleList>
+    <RequiredRuntimeList>
+      <RequiredRuntime Name="CSXS" Version="7.0" />
+    </RequiredRuntimeList>
+  </ExecutionEnvironment>
+
+  <DispatchInfoList>
+    <Extension Id="com.rinsky123.rinsubtitle.panel">
+      <DispatchInfo>
+        <Resources>
+          <MainPath>./client/index.html</MainPath>
+          <ScriptPath>./host/engine.jsx</ScriptPath>
+          <CEFCommandLine>
+            <Parameter>--enable-nodejs</Parameter>
+            <Parameter>--allow-file-access</Parameter>
+            <Parameter>--allow-file-access-from-files</Parameter>
+            <Parameter>--mixed-context</Parameter>
+          </CEFCommandLine>
+        </Resources>
+        <Lifecycle>
+          <AutoVisible>true</AutoVisible>
+        </Lifecycle>
+        <UI>
+          <Type>Panel</Type>
+          <Menu>Rin字幕效果助手</Menu>
+          <Geometry>
+            <Size>
+              <Height>780</Height>
+              <Width>392</Width>
+            </Size>
+          </Geometry>
+        </UI>
+      </DispatchInfo>
+    </Extension>
+  </DispatchInfoList>
+</ExtensionManifest>

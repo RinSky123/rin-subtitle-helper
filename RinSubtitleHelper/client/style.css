@@ -1,0 +1,320 @@
+/* ==================================================================
+ *  Rin字幕效果助手 — 面板样式
+ *  深色玻璃拟态：深灰底 + 半透明卡片 + 高斯模糊 + 蓝色强调
+ * ================================================================== */
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: #16181c;
+  color: #cfd6de;
+  font-family: "Segoe UI", "Microsoft YaHei", "PingFang SC", sans-serif;
+  font-size: 11px;
+  user-select: none;
+}
+
+/* 背景里的两团柔光：让高斯模糊有东西可糊，玻璃感才出来 */
+body::before {
+  content: "";
+  position: fixed;
+  top: -60px; left: -40px; right: -40px; height: 340px;
+  background:
+    radial-gradient(340px 220px at 18% 12%, rgba(58, 132, 255, .30), transparent 70%),
+    radial-gradient(300px 200px at 88% 4%,  rgba(84, 110, 255, .20), transparent 70%),
+    radial-gradient(260px 200px at 50% 42%, rgba(40, 90, 190, .14), transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.app { padding: 8px 8px 12px; position: relative; z-index: 1; }
+
+/* ---------- 顶栏（玻璃） ---------- */
+.topbar {
+  background: rgba(38, 44, 54, .62);
+  backdrop-filter: blur(14px) saturate(140%);
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+  border: 1px solid rgba(120, 160, 220, .22);
+  border-radius: 12px;
+  padding: 8px 11px 7px;
+  margin-bottom: 8px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, .30), inset 0 1px 0 rgba(255,255,255,.06);
+}
+.topbar-main { display: flex; align-items: baseline; }
+.brand {
+  font-weight: 800; font-size: 14px; letter-spacing: .3px;
+  color: #6fb4ff;
+  text-shadow: 0 0 12px rgba(74, 158, 255, .45);
+}
+.ver { color: #6d7e93; font-weight: 600; font-size: 10px; margin-left: 6px; }
+.host-info { color: #74879b; font-size: 10px; margin-left: auto; }
+.topbar-sub { display: flex; align-items: center; gap: 7px; margin-top: 4px; }
+.credit { color: #8fa2b8; font-size: 10px; }
+.credit b { color: #a9c8ee; font-weight: 700; }
+
+/* 制作人徽章：做成一块高亮标签，比普通说明字显眼一档 */
+.author-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 10px; color: #a9cdf6;
+  background: linear-gradient(135deg, rgba(64,140,255,.26), rgba(126,86,255,.24));
+  border: 1px solid rgba(130, 178, 255, .52);
+  border-radius: 10px; padding: 2px 9px 2px 8px;
+  box-shadow: 0 0 12px rgba(74, 158, 255, .26), inset 0 1px 0 rgba(255,255,255,.10);
+  letter-spacing: .2px;
+}
+.author-badge b {
+  font-weight: 800; font-size: 11.5px; letter-spacing: .4px;
+  background: linear-gradient(95deg, #8ecbff 0%, #b8a4ff 50%, #8ecbff 100%);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 7px rgba(130, 180, 255, .75));
+}
+
+.free-tag {
+  color: #6fb4ff; font-size: 10px;
+  background: rgba(47, 111, 208, .18); border: 1px solid rgba(74, 158, 255, .30);
+  border-radius: 8px; padding: 1px 8px;
+  white-space: nowrap;
+}
+/* 顶栏里的免费声明推到最右，和上一行的连接状态对齐 */
+.topbar-sub .free-tag { margin-left: auto; }
+
+/* ---------- 卡片（玻璃） ---------- */
+.card {
+  background: rgba(32, 37, 45, .66);
+  backdrop-filter: blur(13px) saturate(135%);
+  -webkit-backdrop-filter: blur(13px) saturate(135%);
+  border: 1px solid rgba(110, 145, 190, .20);
+  border-radius: 12px;
+  padding: 8px 10px 9px;
+  margin-bottom: 8px;
+  box-shadow: 0 5px 16px rgba(0, 0, 0, .28), inset 0 1px 0 rgba(255,255,255,.045);
+}
+.card-title {
+  font-weight: 800; color: #cfe2f7; font-size: 13px; letter-spacing: .3px;
+  margin-bottom: 6px;
+}
+.sub-title {
+  font-weight: 700; color: #6fb4ff; font-size: 11px;
+  margin: 8px 0 3px; padding-top: 6px;
+  border-top: 1px dashed rgba(110, 145, 190, .25);
+}
+.sub-title:first-child { margin-top: 0; padding-top: 0; border-top: none; }
+
+.row { display: flex; align-items: center; gap: 6px; margin: 4px 0; flex-wrap: wrap; }
+
+.lbl { color: #8b9cad; }
+.val { color: #6fb4ff; min-width: 34px; text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+.hint { color: #76879a; font-size: 10px; margin-top: 3px; line-height: 1.45; }
+.hint.warn { color: #e8b25c; }
+.hint.warn::before { content: "⚠ "; }
+.file-name { color: #97a8b9; font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 160px; }
+.hidden { display: none !important; }
+
+/* ---------- 控件 ---------- */
+input[type="range"] { flex: 1; min-width: 58px; height: 16px; accent-color: #4a9eff; }
+input[type="number"], input[type="text"], select {
+  background: rgba(18, 22, 28, .80); color: #d4dde7;
+  border: 1px solid rgba(110, 145, 190, .26);
+  border-radius: 7px; padding: 3px 6px; font-size: 11px; outline: none;
+}
+input[type="number"], input[type="text"] { backdrop-filter: blur(6px); }
+input[type="number"] { width: 52px; }
+input[type="color"] {
+  width: 28px; height: 22px; padding: 0;
+  border: 1px solid rgba(110, 145, 190, .30);
+  border-radius: 7px; background: rgba(18, 22, 28, .80); cursor: pointer;
+}
+select { min-width: 58px; }
+select option { background: #1c2128; }
+
+.chk, .radio { display: flex; align-items: center; gap: 4px; color: #a9b8c8; }
+input[type="checkbox"], input[type="radio"] { accent-color: #4a9eff; margin: 0; }
+
+.btn {
+  background: rgba(58, 70, 88, .55); color: #cfdcea;
+  border: 1px solid rgba(110, 145, 190, .28);
+  border-radius: 8px; padding: 4px 9px; cursor: pointer; font-size: 11px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: background .12s, border-color .12s, box-shadow .12s;
+}
+.btn:hover {
+  background: rgba(74, 158, 255, .22);
+  border-color: rgba(74, 158, 255, .50);
+  box-shadow: 0 0 10px rgba(74, 158, 255, .18);
+}
+.btn:active { background: rgba(74, 158, 255, .32); }
+.btn.primary {
+  background: linear-gradient(135deg, #4a9eff, #2f6fd0);
+  border-color: #4a9eff; color: #fff; font-weight: 700;
+  box-shadow: 0 3px 12px rgba(47, 111, 208, .40);
+}
+.btn.primary:hover {
+  background: linear-gradient(135deg, #64adff, #3a7ce0);
+  box-shadow: 0 4px 16px rgba(74, 158, 255, .50);
+}
+.btn.mini { padding: 2px 7px; font-size: 10px; border-radius: 7px; }
+
+.btn-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; margin-top: 6px; }
+.btn-grid .primary { grid-column: 1 / -1; }
+
+/* ---------- 色卡 ---------- */
+.color-list { display: flex; flex-wrap: wrap; gap: 5px; margin: 4px 0; }
+.color-item { position: relative; }
+.color-item .swatch { width: 22px; height: 22px; border-radius: 7px; }
+.color-item .del {
+  position: absolute; top: -5px; right: -5px; width: 14px; height: 14px; line-height: 12px;
+  text-align: center; background: rgba(210, 70, 70, .92); color: #fff; border-radius: 50%;
+  font-size: 9px; cursor: pointer; border: none; padding: 0;
+}
+
+/* ---------- 预览舞台：左英右中，各两行 ---------- */
+.pv-stage {
+  display: flex; gap: 0; align-items: stretch;
+  background: linear-gradient(150deg, rgba(8,12,16,.92) 0%, rgba(14,19,24,.92) 100%);
+  border: 1px solid rgba(110, 145, 190, .22);
+  border-radius: 10px;
+  padding: 8px 9px 9px; margin-bottom: 7px; min-height: 84px;
+  overflow: hidden;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
+}
+.pv-col {
+  flex: 1 1 0; min-width: 0;
+  display: flex; flex-direction: column; justify-content: center;
+  position: relative; padding-top: 12px;
+  overflow: hidden;
+}
+.pv-col + .pv-col {
+  border-left: 1px dashed rgba(110, 145, 190, .28);
+  padding-left: 9px; margin-left: 9px;
+}
+.pv-lang {
+  position: absolute; top: 0; left: 1px;
+  font-size: 8px; color: #5e7288; letter-spacing: .6px;
+}
+.pv-col + .pv-col .pv-lang { left: 10px; }
+.pv-line { position: relative; min-height: 18px; overflow: hidden; }
+/* 两句叠在同一行：一句退场的同时另一句在原位入场 —— 这才是"接替"的样子 */
+.pv-line.stack .pv-text {
+  position: absolute; left: 0; top: 0;
+  line-height: 18px;
+}
+.pv-text {
+  display: inline-block; white-space: nowrap;
+  color: #ffffff; font-size: 11.5px; font-weight: 600; letter-spacing: .2px;
+  will-change: clip-path, transform, opacity, filter;
+}
+
+/* ---------- 状态 ---------- */
+.status {
+  margin-top: 6px; padding: 5px 7px;
+  background: rgba(16, 20, 26, .75);
+  border: 1px solid rgba(110, 145, 190, .20);
+  border-radius: 8px; color: #7fc9a6; font-size: 10px; line-height: 1.45;
+  min-height: 18px; word-break: break-all;
+}
+.status.err { color: #ff9393; border-color: rgba(200, 90, 90, .35); background: rgba(40, 20, 22, .70); }
+
+.sticky { position: sticky; bottom: 0; }
+
+/* ---------- 页脚 ---------- */
+.footer {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 6px; padding: 2px 4px 0; flex-wrap: wrap;
+}
+
+/* ---------- chip ---------- */
+.chip-list { display: flex; flex-wrap: wrap; gap: 5px; margin: 4px 0; }
+.chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: rgba(48, 58, 72, .60);
+  border: 1px solid rgba(110, 145, 190, .26);
+  border-radius: 11px; padding: 2px 8px; font-size: 10px; color: #c3d1e0; max-width: 100%;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.chip .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 112px; }
+.chip .x { cursor: pointer; color: #7f90a4; font-size: 12px; line-height: 1; border: none; background: none; padding: 0; }
+.chip .x:hover { color: #ff8f8f; }
+
+/* 预设色点：单色 1 个；多色并排几个小圆 */
+.chip .dots { display: inline-flex; align-items: center; gap: 2px; }
+.chip .dot {
+  width: 11px; height: 11px; border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, .40);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, .28) inset;
+}
+.chip .dot.more {
+  width: auto; min-width: 11px; height: 11px; border-radius: 6px;
+  background: rgba(110, 145, 190, .28) !important;
+  border: 1px solid rgba(140, 175, 220, .40);
+  font-size: 8px; line-height: 9px; text-align: center; color: #dce8f5;
+  padding: 0 3px;
+}
+
+/* ---------- 重置按钮 ---------- */
+.card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px; }
+.card-head .card-title { margin-bottom: 0; }
+.btn.reset { padding: 1px 7px; font-size: 10px; opacity: .62; }
+.btn.reset:hover { opacity: 1; }
+
+/* ---------- 条形调色 ---------- */
+.swatch { width: 22px; height: 20px; border: 1px solid rgba(110, 145, 190, .30); border-radius: 7px; background: #fff; }
+.cbar {
+  position: relative; height: 13px; border-radius: 7px;
+  border: 1px solid rgba(110, 145, 190, .24);
+  margin: 5px 0; cursor: pointer;
+}
+#hue-bar {
+  background: linear-gradient(to right, #f00 0%, #ff0 17%, #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, #f00 100%);
+}
+.cbar-h {
+  position: absolute; top: -3px; left: 0; width: 5px; height: 17px; border-radius: 3px;
+  background: #fff; box-shadow: 0 0 0 1px rgba(30,40,55,.85), 0 1px 3px rgba(0,0,0,.5);
+  transform: translateX(-2.5px); pointer-events: none;
+}
+
+/* ---------- 预设色卡 ---------- */
+.chip.click { cursor: pointer; }
+.chip.click:hover { border-color: rgba(74, 158, 255, .60); background: rgba(74, 158, 255, .18); }
+
+/* ---------- 预览动画关键帧 ---------- */
+@keyframes pvWave {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(calc(-1 * var(--pv-amp, 4px))); }
+}
+/* 光带用「平台」而不是「尖峰」：带内保持实色，只在两端过渡 ——
+   这样文字开头那一段也能吃到满色（和 AE 里 方形+平滑度 的表现一致） */
+@keyframes pvFlow {
+  0%, 100%       { color: var(--pv-base, #ffffff); }
+  40%, 60%       { color: var(--pv-flow, #4a9eff); }
+}
+
+/* ---------- 字体选择弹窗（玻璃） ---------- */
+.modal-mask {
+  position: fixed; inset: 0; background: rgba(8, 11, 16, .55);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  display: flex; align-items: center; justify-content: center; z-index: 999;
+}
+.modal-box {
+  width: 92%; height: 78%;
+  background: rgba(30, 36, 44, .92);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  border: 1px solid rgba(110, 145, 190, .28);
+  border-radius: 14px; display: flex; flex-direction: column; overflow: hidden;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, .55);
+}
+.modal-head { display: flex; gap: 6px; padding: 8px; border-bottom: 1px solid rgba(110, 145, 190, .20); }
+.modal-head input[type="text"] { flex: 1; }
+.modal-tools { display: flex; align-items: center; gap: 8px; padding: 5px 8px; border-bottom: 1px solid rgba(110, 145, 190, .20); }
+.font-options { flex: 1; overflow-y: auto; padding: 4px 6px; }
+.font-row { display: flex; align-items: center; gap: 6px; padding: 4px 6px; border-radius: 7px; cursor: pointer; }
+.font-row:hover { background: rgba(74, 158, 255, .14); }
+.font-row.sel { background: rgba(74, 158, 255, .28); }
+.font-row .fname { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; color: #d6e2ef; }
+.font-row .fps { color: #71869c; font-size: 9px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 118px; }
