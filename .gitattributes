@@ -8,12 +8,13 @@
 *.bat   text eol=crlf
 *.cmd   text eol=crlf
 
-# 扩展清单用 XML，LF 即可
+# 扩展清单是 XML，LF 即可
 *.xml   text eol=lf
 *.jsx   text eol=lf
 *.js    text eol=lf
 *.html  text eol=lf
 *.css   text eol=lf
+*.md    text eol=lf
 
 # 二进制文件不要动
 *.png   binary
