@@ -29,7 +29,56 @@ body::before {
   z-index: 0;
 }
 
-.app { padding: 8px 8px 12px; position: relative; z-index: 1; }
+/* 两列网格：面板加宽后让内容尽量在一屏内排完。
+   窄面板（用户把面板拖窄）时自动退回单列，不会挤成一团。 */
+.app { padding: 5px 8px 4px; position: relative; z-index: 1; }
+
+/* 两列布局：用 grid 让同一行的两张卡片**自动等高**，四角严格对齐。
+   （flex 两个独立列做不到跨列等高，会出现"左卡高右卡矮、底边不齐"） */
+.app-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  align-items: stretch;       /* 同一行卡片等高 */
+}
+
+/* 列容器不参与布局，只做分组用；卡片用网格自动流排 */
+
+/* 卡片按顺序自动排进 2 列网格，同一行自动等高 */
+.app-body .card {
+  display: flex; flex-direction: column;
+  margin-bottom: 0;
+}
+.app-body .card > .card-head { flex: 0 0 auto; }
+
+/* 通栏卡片：④ 动画预览 与 ⑤ 波浪 都横跨两列 */
+.app-body .card.wide { grid-column: 1 / -1; }
+
+/* 同一行两卡等高后，矮的那张底部会留一片空白。
+   让预设色卡列表吃掉这段余量，看起来是"色卡区更大"而不是"缺了内容"。 */
+.app-body .card > .chip-list { flex: 1 1 auto; align-content: flex-start; }
+.app-body .card > .row:last-child { margin-top: auto; }
+
+/* 窄面板（用户把面板拖窄）时退回单列，不会挤成一团 */
+@media (max-width: 560px) {
+  .app-body { grid-template-columns: 1fr; }
+}
+
+/* ---------- 未完成提示条（第二页顶部） ----------
+   醒目但不刺眼：琥珀色描边 + 深色底，和面板整体色调统一，
+   但足够让人第一眼看到，不会被当成普通提示。 */
+.wip-banner {
+  grid-column: 1 / -1;
+  display: flex; align-items: flex-start; gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid rgba(232, 178, 92, .55);
+  border-radius: 8px;
+  background: rgba(232, 178, 92, .10);
+}
+.wip-icon { color: #e8b25c; font-size: 14px; line-height: 1.2; flex: 0 0 auto; }
+.wip-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.wip-body b { color: #f0c274; font-size: 12px; letter-spacing: .3px; }
+.wip-sub { color: #b99a6d; font-size: 10px; line-height: 1.45; }
 
 /* ---------- 顶栏（玻璃） ---------- */
 .topbar {
@@ -38,19 +87,53 @@ body::before {
   -webkit-backdrop-filter: blur(14px) saturate(140%);
   border: 1px solid rgba(120, 160, 220, .22);
   border-radius: 12px;
-  padding: 8px 11px 7px;
-  margin-bottom: 8px;
+  padding: 3px 10px 3px;
+  margin-bottom: 4px;
   box-shadow: 0 6px 18px rgba(0, 0, 0, .30), inset 0 1px 0 rgba(255,255,255,.06);
 }
-.topbar-main { display: flex; align-items: baseline; }
+/* 顶栏排成一行，宽面板时省下整整一行高度 */
+.topbar-main { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .brand {
   font-weight: 800; font-size: 14px; letter-spacing: .3px;
   color: #6fb4ff;
   text-shadow: 0 0 12px rgba(74, 158, 255, .45);
 }
-.ver { color: #6d7e93; font-weight: 600; font-size: 10px; margin-left: 6px; }
+.ver { color: #6d7e93; font-weight: 600; font-size: 10px; }
+
+/* ---------- 分页：标题下方单独一条窄栏，左右顶满 ---------- */
+.pagebar {
+  display: flex; gap: 4px;
+  margin-bottom: 6px;
+  padding: 4px;
+  background: rgba(26, 31, 39, .72);
+  border: 1px solid rgba(110, 145, 190, .22);
+  border-radius: 10px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
+}
+.page-tab {
+  flex: 1 1 0; min-width: 0;
+  padding: 5px 8px;
+  font-size: 11px; font-weight: 700; letter-spacing: .3px;
+  color: #8b9cad;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis;
+  transition: background .12s, color .12s, border-color .12s;
+}
+.page-tab:hover { color: #cfe2f7; background: rgba(58, 70, 88, .45); }
+/* 当前页：高亮 */
+.page-tab.active {
+  color: #dcecff;
+  background: linear-gradient(135deg, rgba(64,140,255,.34), rgba(126,86,255,.28));
+  border-color: rgba(130, 178, 255, .55);
+  box-shadow: 0 0 10px rgba(74, 158, 255, .22);
+}
+/* 前后翻页按钮窄一点，把中间两页留给标题 */
+.page-tab#page-prev, .page-tab#page-next { flex: 0 0 auto; padding: 5px 10px; font-weight: 600; }
 .host-info { color: #74879b; font-size: 10px; margin-left: auto; }
-.topbar-sub { display: flex; align-items: center; gap: 7px; margin-top: 4px; }
 .credit { color: #8fa2b8; font-size: 10px; }
 .credit b { color: #a9c8ee; font-weight: 700; }
 
@@ -78,8 +161,6 @@ body::before {
   border-radius: 8px; padding: 1px 8px;
   white-space: nowrap;
 }
-/* 顶栏里的免费声明推到最右，和上一行的连接状态对齐 */
-.topbar-sub .free-tag { margin-left: auto; }
 
 /* ---------- 卡片（玻璃） ---------- */
 .card {
@@ -88,8 +169,8 @@ body::before {
   -webkit-backdrop-filter: blur(13px) saturate(135%);
   border: 1px solid rgba(110, 145, 190, .20);
   border-radius: 12px;
-  padding: 8px 10px 9px;
-  margin-bottom: 8px;
+  padding: 4px 8px 4px;
+  margin-bottom: 4px;
   box-shadow: 0 5px 16px rgba(0, 0, 0, .28), inset 0 1px 0 rgba(255,255,255,.045);
 }
 .card-title {
@@ -98,18 +179,44 @@ body::before {
 }
 .sub-title {
   font-weight: 700; color: #6fb4ff; font-size: 11px;
-  margin: 8px 0 3px; padding-top: 6px;
+  margin: 5px 0 2px; padding-top: 4px;
   border-top: 1px dashed rgba(110, 145, 190, .25);
 }
 .sub-title:first-child { margin-top: 0; padding-top: 0; border-top: none; }
 
-.row { display: flex; align-items: center; gap: 6px; margin: 4px 0; flex-wrap: wrap; }
+.row { display: flex; align-items: center; gap: 6px; margin: 0; flex-wrap: wrap; }
+/* 每一行内部：滑杆统一弹性拉伸，输入框统一宽度 → 各行右边严格对齐
+   两列布局下单卡只有 300px 左右，滑杆和下拉框都要能被压窄，否则整行会折成两行 */
+.row > input[type="range"] { flex: 1 1 40px; min-width: 40px; }
+.row > .num-in { flex: 0 0 46px; }
+.row > select { flex: 0 1 auto; min-width: 0; max-width: 92px; }
+/* 第 2 页的流光模式名较长（全范围晕染留白），给它宽一点，别被截断 */
+#r-flow-mode { max-width: 132px; }
 
-.lbl { color: #8b9cad; }
+.lbl { color: #8b9cad; white-space: nowrap; }
 .val { color: #6fb4ff; min-width: 34px; text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+
+/* 滑杆旁边的数值：直接可输入，方便精确调整 */
+.num-in {
+  width: 46px; min-width: 46px; padding: 1px 4px;
+  text-align: right; font-weight: 600; font-size: 10.5px;
+  color: #6fb4ff;
+  background: rgba(18, 22, 28, .80);
+  border: 1px solid rgba(110, 145, 190, .26);
+  border-radius: 6px; outline: none;
+  -moz-appearance: textfield;
+}
+.num-in::-webkit-outer-spin-button,
+.num-in::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.num-in:focus { border-color: #4a9eff; box-shadow: 0 0 0 2px rgba(74, 158, 255, .18); }
 .hint { color: #76879a; font-size: 10px; margin-top: 3px; line-height: 1.45; }
+/* 输入框后面的单位字（帧 / 秒），比 label 淡一档 */
+.unit { color: #7d8fa3; font-size: 10px; margin-left: -2px; }
 .hint.warn { color: #e8b25c; }
 .hint.warn::before { content: "⚠ "; }
+/* 发光色跟随文字时的提示：换个颜色，让用户一眼看出状态变了 */
+.hint.follow { color: #8ecbff; }
+.hint.follow b { color: #b8e0ff; }
 .file-name { color: #97a8b9; font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 160px; }
 .hidden { display: none !important; }
 
@@ -158,7 +265,8 @@ input[type="checkbox"], input[type="radio"] { accent-color: #4a9eff; margin: 0; 
 }
 .btn.mini { padding: 2px 7px; font-size: 10px; border-radius: 7px; }
 
-.btn-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; margin-top: 6px; }
+/* 执行区按钮：宽面板时排成一行，窄面板自动折行 */
+.btn-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(92px, 1fr)); gap: 4px; margin-top: 4px; }
 .btn-grid .primary { grid-column: 1 / -1; }
 
 /* ---------- 色卡 ---------- */
@@ -177,7 +285,7 @@ input[type="checkbox"], input[type="radio"] { accent-color: #4a9eff; margin: 0; 
   background: linear-gradient(150deg, rgba(8,12,16,.92) 0%, rgba(14,19,24,.92) 100%);
   border: 1px solid rgba(110, 145, 190, .22);
   border-radius: 10px;
-  padding: 8px 9px 9px; margin-bottom: 7px; min-height: 84px;
+  padding: 4px 8px 5px; margin-bottom: 4px; min-height: 52px;
   overflow: hidden;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
 }
@@ -196,21 +304,166 @@ input[type="checkbox"], input[type="radio"] { accent-color: #4a9eff; margin: 0; 
   font-size: 8px; color: #5e7288; letter-spacing: .6px;
 }
 .pv-col + .pv-col .pv-lang { left: 10px; }
-.pv-line { position: relative; min-height: 18px; overflow: hidden; }
+.pv-line { position: relative; min-height: 18px; overflow: hidden; text-align: center; }
 /* 两句叠在同一行：一句退场的同时另一句在原位入场 —— 这才是"接替"的样子 */
 .pv-line.stack .pv-text {
-  position: absolute; left: 0; top: 0;
-  line-height: 18px;
+  position: absolute; left: 0; right: 0; top: 0;
+  line-height: 18px; text-align: center;
 }
 .pv-text {
   display: inline-block; white-space: nowrap;
   color: #ffffff; font-size: 11.5px; font-weight: 600; letter-spacing: .2px;
   will-change: clip-path, transform, opacity, filter;
+  /* 两列布局下面板可能较窄：宁可裁掉尾巴，也不要顶到隔壁列 */
+  max-width: 100%; overflow: hidden;
+}
+/* stack 里的文字要撑满整行，才能靠 text-align 居中 */
+.pv-line.stack .pv-text { display: block; }
+
+/* 发光预览：比动画预览矮一点，且不能被裁切 —— 辉光和投影要能溢出去才看得见 */
+.pv-stage.glow-stage {
+  min-height: 46px; margin-top: 4px; margin-bottom: 5px;
+  overflow: visible;
+  padding: 6px 12px 7px;
+}
+.pv-stage.glow-stage .pv-col { padding-top: 11px; overflow: visible; }
+.pv-stage.glow-stage .pv-line { overflow: visible; }
+.pv-stage.glow-stage .pv-text { font-size: 12.5px; }
+
+/* ---------- ⑤ 波浪：三段参数等宽并排 ---------- */
+.wave-row { display: flex; align-items: center; gap: 10px; }
+.wave-row > .wave-grp {
+  display: flex; align-items: center; gap: 5px;
+  flex: 1 1 0; min-width: 0;
+}
+.wave-row .wave-grp > input[type="range"] { flex: 1 1 0; min-width: 30px; }
+
+/* ---------- 动画参数两列 ---------- */
+.param-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 0 12px; align-items: start;
+}
+.param-grid > .row { margin: 0; }
+.param-grid > .row.span2 { grid-column: 1 / -1; }
+/* 每个"参数 + 说明"单元。说明紧贴在控件下面，两列各自独立，不会互相撑高 */
+.pcell { display: flex; flex-direction: column; min-width: 0; }
+.pcell > .row { margin: 0; }
+.frame-note { margin-top: 1px; min-height: 13px; }
+.fps-hint { margin-left: auto; margin-top: 0; }
+/* 只在**真的很窄**时才退回单列。
+   注意断点要比面板默认宽度小不少：④ 是通栏卡片，内容区约 606px，
+   用 620px 会在正常宽度下就触发，把两列参数挤成一列。 */
+@media (max-width: 480px) {
+  .param-grid { grid-template-columns: 1fr; }
+  .param-grid > .row.span2 { grid-column: auto; }
+}
+
+/* ---------- 画面与文字：左参数 + 右实时排版预览 ---------- */
+.cv-wrap { display: flex; gap: 10px; align-items: flex-start; }
+.cv-fields { flex: 1 1 auto; min-width: 0; }
+
+.cv-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 5px 8px;
+}
+.cv-cell { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.cv-lbl { color: #8b9cad; font-size: 10px; white-space: nowrap; }
+.cv-cell > input {
+  width: 100%; min-width: 0;
+  background: rgba(18, 22, 28, .80); color: #d4dde7;
+  border: 1px solid rgba(110, 145, 190, .26);
+  border-radius: 6px; padding: 2px 6px; font-size: 11px; outline: none;
+}
+.cv-cell > input:focus { border-color: #4a9eff; box-shadow: 0 0 0 2px rgba(74, 158, 255, .18); }
+.cv-note { margin-top: 6px; font-size: 9.5px; line-height: 1.5; }
+
+/* 右侧预览：按真实画面比例缩放显示 */
+.cv-preview { flex: 0 0 150px; display: flex; flex-direction: column; gap: 4px; }
+.cv-frame {
+  width: 150px; height: 150px;
+  background: #0b0e12;
+  border: 1px solid rgba(110, 145, 190, .30);
+  border-radius: 8px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  overflow: hidden;
+  position: relative;
+  box-shadow: inset 0 0 22px rgba(0,0,0,.75);
+}
+.cv-line {
+  color: #ffffff; white-space: nowrap;
+  text-align: center; line-height: 1;
+  will-change: transform, font-size;
+}
+.cv-info {
+  color: #6d7e93; font-size: 9.5px; text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- 流光：三种效果平铺，各自一个开关 ---------- */
+.flow-cards { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; margin-top: 4px; }
+.flow-card {
+  display: flex; align-items: flex-start; gap: 6px;
+  padding: 5px 8px;
+  background: rgba(48, 58, 72, .50);
+  border: 1px solid rgba(110, 145, 190, .24);
+  border-radius: 8px; cursor: pointer;
+  min-width: 0;
+}
+.flow-card:hover { border-color: rgba(74, 158, 255, .48); }
+.flow-card:has(input:checked) {
+  background: rgba(64, 140, 255, .22);
+  border-color: rgba(74, 158, 255, .60);
+}
+.flow-card input { accent-color: #4a9eff; margin: 2px 0 0 0; flex: 0 0 auto; }
+.fc-body { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.fc-name { color: #c3d1e0; font-size: 11px; font-weight: 600; }
+.flow-card:has(input:checked) .fc-name { color: #dcecff; }
+.fc-desc { color: #6d7e93; font-size: 9px; line-height: 1.35; }
+@media (max-width: 520px) {
+  .flow-cards { grid-template-columns: 1fr; }
+}
+
+/* ---------- 随机动画：多选开关 ---------- */
+.anim-picks { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+.anim-pick {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 10px;
+  background: rgba(48, 58, 72, .55);
+  border: 1px solid rgba(110, 145, 190, .26);
+  border-radius: 8px; cursor: pointer;
+  color: #c3d1e0; font-size: 11px;
+}
+.anim-pick:hover { border-color: rgba(74, 158, 255, .50); }
+.anim-pick:has(input:checked) {
+  background: rgba(64, 140, 255, .22);
+  border-color: rgba(74, 158, 255, .62);
+  color: #dcecff;
+}
+.anim-pick input { accent-color: #4a9eff; margin: 0; }
+.anim-warn { color: #e8b25c; margin-top: 5px; }
+
+/* ---------- 执行进度条 ---------- */
+.run-progress { margin-top: 5px; }
+.rp-head {
+  display: flex; align-items: center; justify-content: space-between;
+  font-size: 10px; color: #8ea6c0; margin-bottom: 3px;
+}
+.rp-count { color: #6fb4ff; font-weight: 700; font-variant-numeric: tabular-nums; }
+.rp-track {
+  height: 6px; border-radius: 4px; overflow: hidden;
+  background: rgba(18, 22, 28, .90);
+  border: 1px solid rgba(110, 145, 190, .24);
+}
+.rp-bar {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, #3d8ef0, #7ec8ff);
+  box-shadow: 0 0 8px rgba(74, 158, 255, .55);
+  transition: width .12s linear;
 }
 
 /* ---------- 状态 ---------- */
 .status {
-  margin-top: 6px; padding: 5px 7px;
+  margin-top: 4px; padding: 3px 7px;
   background: rgba(16, 20, 26, .75);
   border: 1px solid rgba(110, 145, 190, .20);
   border-radius: 8px; color: #7fc9a6; font-size: 10px; line-height: 1.45;
@@ -218,12 +471,12 @@ input[type="checkbox"], input[type="radio"] { accent-color: #4a9eff; margin: 0; 
 }
 .status.err { color: #ff9393; border-color: rgba(200, 90, 90, .35); background: rgba(40, 20, 22, .70); }
 
-.sticky { position: sticky; bottom: 0; }
+.sticky { position: sticky; bottom: 0; z-index: 5; }
 
 /* ---------- 页脚 ---------- */
 .footer {
   display: flex; align-items: center; justify-content: space-between;
-  gap: 6px; padding: 2px 4px 0; flex-wrap: wrap;
+  gap: 6px; padding: 6px 4px 0; flex-wrap: wrap;
 }
 
 /* ---------- chip ---------- */
@@ -268,7 +521,9 @@ input[type="checkbox"], input[type="radio"] { accent-color: #4a9eff; margin: 0; 
   border: 1px solid rgba(110, 145, 190, .24);
   margin: 5px 0; cursor: pointer;
 }
-#hue-bar {
+/* 色相条：文字颜色和发光颜色各一条，用 class 选择器统一给背景，
+   否则只写了 #hue-bar 的话，发光那条（#ghue-bar）会是一条透明的空条 */
+.cbar-hue {
   background: linear-gradient(to right, #f00 0%, #ff0 17%, #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, #f00 100%);
 }
 .cbar-h {
@@ -291,6 +546,12 @@ input[type="checkbox"], input[type="radio"] { accent-color: #4a9eff; margin: 0; 
 @keyframes pvFlow {
   0%, 100%       { color: var(--pv-base, #ffffff); }
   40%, 60%       { color: var(--pv-flow, #4a9eff); }
+}
+
+/* 彩带：背景条纹匀速平移，模拟分形噪波的流动 */
+@keyframes pvRibbonSlide {
+  from { background-position: 0% 50%; }
+  to   { background-position: 200% 50%; }
 }
 
 /* ---------- 字体选择弹窗（玻璃） ---------- */

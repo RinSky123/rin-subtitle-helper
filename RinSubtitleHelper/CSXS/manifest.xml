@@ -1,10 +1,10 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <ExtensionManifest ExtensionBundleId="com.rinsky123.rinsubtitle"
-                   ExtensionBundleVersion="0.33.0"
+                   ExtensionBundleVersion="1.13.1"
                    Version="7.0"
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <ExtensionList>
-    <Extension Id="com.rinsky123.rinsubtitle.panel" Version="0.33.0" />
+    <Extension Id="com.rinsky123.rinsubtitle.panel" Version="1.13.1" />
   </ExtensionList>
 
   <ExecutionEnvironment>
@@ -41,8 +41,8 @@
           <Menu>Rin字幕效果助手</Menu>
           <Geometry>
             <Size>
-              <Height>780</Height>
-              <Width>392</Width>
+              <Height>820</Height>
+              <Width>640</Width>
             </Size>
           </Geometry>
         </UI>

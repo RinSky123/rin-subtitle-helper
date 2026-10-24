@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8">
@@ -11,14 +11,24 @@
   <div class="topbar">
     <div class="topbar-main">
       <span class="brand">Rin 字幕效果助手</span>
-      <span id="ver" class="ver">v0.33</span>
-      <span id="host-info" class="host-info">连接中…</span>
-    </div>
-    <div class="topbar-sub">
+      <span id="ver" class="ver">v1.13.1</span>
       <span class="author-badge">制作人 <b>RinSky123</b></span>
       <span class="free-tag">此脚本完全免费使用</span>
+      <span id="host-info" class="host-info">连接中…</span>
     </div>
   </div>
+
+  <!-- 页面切换：单独一条窄栏，左右顶满，紧跟在标题下面 -->
+  <div class="pagebar">
+    <button id="page-prev" class="page-tab hidden" title="回到上一页">‹ 上一页</button>
+    <button id="page-1-tab" class="page-tab active" data-page="1">基础字幕面板</button>
+    <button id="page-2-tab" class="page-tab" data-page="2" title="尚未测试完善，请勿使用">随机字幕面板 · 未完成</button>
+    <button id="page-next" class="page-tab" title="翻到下一页">下一页 ›</button>
+  </div>
+
+<!-- ==================== 第 1 页：基础字幕面板 ==================== -->
+<div id="page-1" class="app-body">
+  <!-- 网格自动流：① ② / ③文字色 ③发光 / ⑤ -->
 
   <!-- 1. 字幕 -->
   <section class="card">
@@ -33,10 +43,18 @@
     </div>
     <div class="row">
       <label class="lbl">分行</label>
-      <input type="range" id="linebreak" min="8" max="60" value="30" step="1">
-      <span id="linebreak-val" class="val">30</span>
+      <input type="range" id="linebreak" min="8" max="60" value="35" step="1">
+      <input type="number" id="linebreak-val" class="val num-in" value="35">
+      <label class="lbl">延长</label>
+      <input type="number" id="extend-frames" class="num-in" value="50" step="1"
+             title="每条字幕的出点往后延长多少帧（0 = 不延长）。按合成帧率自动换算">
+      <span class="unit">帧</span>
+    </div>
+    <div class="row">
       <label class="chk"><input type="checkbox" id="precompose" checked> 预合成</label>
-      <input type="text" id="precomp-name" value="PF_字幕" style="width:82px">
+      <input type="text" id="precomp-name" value="字幕" style="width:82px">
+      <label class="chk"><input type="checkbox" id="force-upper"> 强制大写</label>
+      <label class="chk"><input type="checkbox" id="clean-punct"> 清洗标点</label>
     </div>
   </section>
 
@@ -63,10 +81,10 @@
     </div>
   </section>
 
-  <!-- 3. 文字颜色 / 发光 -->
+  <!-- 3a. 文字颜色 / 流光 -->
   <section class="card">
     <div class="card-head">
-      <span class="card-title">③ 文字颜色 / 发光</span>
+      <span class="card-title">③ 文字颜色 / 流光</span>
       <button class="btn mini reset" data-reset="3">重置</button>
     </div>
 
@@ -78,14 +96,13 @@
       <span id="color-hex" class="val" style="min-width:58px">#ffffff</span>
       <button id="preset-save" class="btn mini" style="margin-left:auto">存预设</button>
     </div>
-    <div class="cbar" id="hue-bar"><div class="cbar-h" id="hue-h"></div></div>
+    <div class="cbar cbar-hue" id="hue-bar"><div class="cbar-h" id="hue-h"></div></div>
     <div class="cbar" id="light-bar"><div class="cbar-h" id="light-h"></div></div>
 
     <div id="color-random-box" class="hidden">
       <div class="row">
         <button id="add-color" class="btn mini">+ 色</button>
         <button id="randomize-colors" class="btn mini">反色</button>
-        <span class="hint">每条字幕取一个，相邻不重复</span>
       </div>
       <div id="color-list" class="color-list"></div>
     </div>
@@ -97,37 +114,90 @@
       <select id="flow-mode">
         <option value="band" selected>光带</option>
         <option value="wash">晕染留白</option>
+        <option value="fullwash">全范围晕染留白</option>
+        <option value="ribbon">彩带</option>
       </select>
       <label class="lbl">周期</label>
       <input type="range" id="flow-period" min="1" max="12" value="5" step="0.5">
-      <span id="flow-period-val" class="val">5.0s</span>
+      <input type="number" id="flow-period-val" class="val num-in" value="5.0">
     </div>
-    <div class="hint">光带：底色转白，颜色像光带扫过｜晕染留白：整句都是这个颜色，一段柔和留白滑过去。周期越长越慢，5 秒左右最耐看</div>
+    <div class="row" id="flow-blank-row">
+      <label class="lbl">留白处数</label>
+      <input type="range" id="flow-blank-count" min="2" max="6" value="3" step="1">
+      <input type="number" id="flow-blank-count-val" class="val num-in" value="3">
+    </div>
+  </section>
 
-    <div class="sub-title">发光</div>
+  <!-- 3b. 发光 -->
+  <section class="card">
+    <div class="card-head">
+      <span class="card-title">③ 发光</span>
+      <button class="btn mini reset" data-reset="3">重置</button>
+    </div>
+
+    <div class="pv-stage glow-stage">
+      <div class="pv-col">
+        <span class="pv-lang">EN</span>
+        <div class="pv-line">
+          <span class="pv-text pv-fx" id="gv-en">Glow Aa123</span>
+        </div>
+      </div>
+      <div class="pv-col">
+        <span class="pv-lang">中</span>
+        <div class="pv-line">
+          <span class="pv-text pv-fx" id="gv-cn">发光效果 Aa123</span>
+        </div>
+      </div>
+    </div>
+
     <div class="row">
       <label class="chk"><input type="checkbox" id="glow-en" checked> 启用</label>
       <label class="lbl">阈值</label>
       <input type="range" id="glow-th" min="0" max="100" value="0" step="1">
-      <span id="glow-th-val" class="val">0</span>
+      <input type="number" id="glow-th-val" class="val num-in" value="0">
       <label class="lbl">半径</label>
       <input type="range" id="glow-r" min="0" max="1000" value="200" step="10">
-      <span id="glow-r-val" class="val">200</span>
+      <input type="number" id="glow-r-val" class="val num-in" value="200">
     </div>
     <div class="row">
-      <label class="lbl">强度</label>
-      <input type="range" id="glow-i" min="0" max="10" value="0.5" step="0.05">
-      <span id="glow-i-val" class="val">0.5</span>
-      <label class="lbl">发光色</label>
-      <input type="color" id="glow-color" value="#ffffff" class="color">
-      <label class="chk"><input type="checkbox" id="glow-color-random"> 每句随机</label>
+      <label class="lbl">曝光</label>
+      <input type="range" id="glow-exp" min="0" max="3" value="0.32" step="0.01">
+      <input type="number" id="glow-exp-val" class="val num-in" value="0.32">
+      <label class="lbl">灯光强度</label>
+      <input type="range" id="glow-i" min="0" max="3" value="0.4" step="0.01">
+      <input type="number" id="glow-i-val" class="val num-in" value="0.40">
     </div>
+
+    <div class="sub-title">发光颜色</div>
+    <div class="row">
+      <label class="radio"><input type="radio" name="gcmode" value="single" checked> 单色</label>
+      <label class="radio"><input type="radio" name="gcmode" value="random"> 随机</label>
+      <div class="swatch" id="glow-swatch"></div>
+      <span id="glow-hex" class="val" style="min-width:58px">#ffffff</span>
+      <button id="glow-preset-save" class="btn mini" style="margin-left:auto">存预设</button>
+    </div>
+    <div class="cbar cbar-hue" id="ghue-bar"><div class="cbar-h" id="ghue-h"></div></div>
+    <div class="cbar" id="glight-bar"><div class="cbar-h" id="glight-h"></div></div>
+
+    <div id="glow-random-box" class="hidden">
+      <div class="row">
+        <button id="add-glow-color" class="btn mini">+ 色</button>
+        <button id="randomize-glow-colors" class="btn mini">反色</button>
+      </div>
+      <div id="glow-list" class="color-list"></div>
+    </div>
+
+    <div id="glow-preset-list" class="chip-list"></div>
+
+    <!-- 发光色是否生效，取决于文字颜色（白 → 用这里的设置；非白 → 跟随文字） -->
+    <div id="glow-color-hint" class="hint glow-hint"></div>
+
   </section>
 
-  <!-- 4. 动画 + 双行预览 -->
-  <section class="card">
+  <!-- 4. 动画 + 双行预览（通栏，排在 ⑤ 前面） -->
+  <section class="card wide">
     <div class="card-head">
-      <span class="card-title">④ 预览 / 入场出场</span>
+      <span class="card-title">④ 动画预览 / 入场出场</span>
       <button class="btn mini reset" data-reset="4">重置</button>
     </div>
 
@@ -135,116 +205,361 @@
       <div class="pv-col">
         <span class="pv-lang">EN</span>
         <div class="pv-line stack">
-          <span class="pv-text" id="pv-en-1">In/out preview Aa123</span>
-          <span class="pv-text" id="pv-en-2">Subtitle effect Aa123</span>
+          <span class="pv-text" id="pv-en-1">Welcome to Rin Subtitle Effect Assistant</span>
+          <span class="pv-text" id="pv-en-2">May you have a pleasant life.</span>
         </div>
       </div>
       <div class="pv-col">
         <span class="pv-lang">中</span>
         <div class="pv-line stack">
-          <span class="pv-text" id="pv-cn-1">这是您的出入场预览效果</span>
-          <span class="pv-text" id="pv-cn-2">字幕效果 Aa123</span>
+          <span class="pv-text" id="pv-cn-1">欢迎使用 Rin 字幕效果助手</span>
+          <span class="pv-text" id="pv-cn-2">祝您生活愉快</span>
         </div>
       </div>
     </div>
 
-    <div id="anim-page-1">
-    <div class="row">
-      <label class="chk"><input type="checkbox" id="do-entry" checked> 入场</label>
-      <select id="entry-based">
-        <option value="sentence">句</option>
-        <option value="word">词</option>
-        <option value="character" selected>字符</option>
-      </select>
-      <input type="range" id="entry-sec" min="0.05" max="3" value="0.8" step="0.05">
-      <span id="entry-sec-val" class="val">0.80s</span>
+    <!-- 动画参数按两列排，整张卡压到一屏内 -->
+    <div id="anim-page-1" class="param-grid">
+    <!-- 入场的秒数改成"帧偏移"：0 = 基准 1.5 秒，往右加帧、往左减帧 -->
+    <div class="pcell">
+      <div class="row">
+        <label class="chk"><input type="checkbox" id="do-entry" checked> 入场</label>
+        <select id="entry-based">
+          <option value="sentence">句</option>
+          <option value="word" selected>词</option>
+          <option value="character">字符</option>
+        </select>
+        <input type="range" id="entry-frames" min="-60" max="60" value="0" step="1">
+        <input type="number" id="entry-frames-val" class="val num-in" value="0">
+        <span class="unit">帧</span>
+      </div>
+      <div class="hint frame-note" id="entry-frames-note"></div>
     </div>
 
-    <div class="row">
-      <label class="chk"><input type="checkbox" id="do-exit" checked> 出场</label>
-      <select id="exit-based">
-        <option value="sentence">句</option>
-        <option value="word">词</option>
-        <option value="character" selected>字符</option>
-      </select>
-      <input type="range" id="exit-sec" min="0.05" max="3" value="1" step="0.05">
-      <span id="exit-sec-val" class="val">1.00s</span>
+    <div class="pcell">
+      <div class="row">
+        <label class="chk"><input type="checkbox" id="do-tracking" checked> 间距</label>
+        <input type="range" id="spacing" min="0" max="50" value="6" step="1">
+        <input type="number" id="spacing-val" class="val num-in" value="6">
+        <select id="spacing-based">
+          <option value="character" selected>按字符</option>
+          <option value="word">按词</option>
+        </select>
+      </div>
+      <div class="hint frame-note" id="spacing-note"></div>
     </div>
 
-    <div class="row">
+    <!-- 出场：0 = 基准 35 帧淡完，往左缩短（最短 10 帧），往右延长（最长 50 帧） -->
+    <div class="pcell">
+      <div class="row">
+        <label class="chk"><input type="checkbox" id="do-exit" checked> 出场</label>
+        <select id="exit-based">
+          <option value="sentence" selected>句</option>
+          <option value="word">词</option>
+          <option value="character">字符</option>
+        </select>
+        <input type="range" id="exit-frames" min="-25" max="15" value="0" step="1">
+        <input type="number" id="exit-frames-val" class="val num-in" value="0">
+        <span class="unit">帧</span>
+      </div>
+      <div class="hint frame-note" id="exit-frames-note"></div>
+    </div>
+
+    <div class="pcell">
+      <div class="row">
+        <label class="chk" title="从入场开始一直放大到出场结束，字间距同时慢慢拉开。只要有动画就自动生效；取消勾选可关闭"><input type="checkbox" id="grow-en" checked> 放大</label>
+        <input type="range" id="grow-amt" min="0" max="30" value="6" step="1">
+        <input type="number" id="grow-amt-val" class="val num-in" value="6">
+      </div>
+      <div class="hint frame-note" id="grow-note"></div>
+    </div>
+
+    <div class="row span2">
       <label class="lbl">位移Y</label>
       <input type="number" id="entry-move" value="0" step="5" class="num">
       <label class="lbl">出场Y</label>
       <input type="number" id="exit-move" value="0" step="5" class="num">
       <label class="chk"><input type="checkbox" id="overlap" checked> 交叠</label>
-    </div>
-
-    <div class="row">
-      <label class="chk"><input type="checkbox" id="do-tracking" checked> 间距</label>
-      <input type="range" id="spacing" min="0" max="50" value="6" step="1">
-      <span id="spacing-val" class="val">6</span>
-      <select id="spacing-based">
-        <option value="character" selected>按字符</option>
-        <option value="word">按词</option>
-      </select>
-    </div>
-
-    <div class="row">
-      <label class="chk"><input type="checkbox" id="grow-en" checked> 放大</label>
-      <input type="range" id="grow-amt" min="0" max="20" value="5" step="1">
-      <span id="grow-amt-val" class="val">5%</span>
+      <span class="hint fps-hint">帧数按合成帧率换算（预览按 25fps 折算）</span>
     </div>
     </div>
   </section>
 
-  <!-- 5. 波浪 -->
-  <section class="card">
+  <!-- 5. 波浪（通栏单行：三段参数并排） -->
+  <section class="card wide">
     <div class="card-head">
       <span class="card-title">⑤ 波浪</span>
       <button class="btn mini reset" data-reset="5">重置</button>
     </div>
-    <div class="row">
+    <div class="row wave-row">
       <label class="chk"><input type="checkbox" id="wave-en"> 启用</label>
-      <label class="lbl">高</label>
-      <input type="range" id="wave-h" min="0" max="100" value="4" step="1">
-      <span id="wave-h-val" class="val">4</span>
-      <label class="lbl">宽</label>
-      <input type="range" id="wave-w" min="20" max="1200" value="400" step="10">
-      <span id="wave-w-val" class="val">400</span>
+      <span class="wave-grp">
+        <label class="lbl">高</label>
+        <input type="range" id="wave-h" min="0" max="100" value="4" step="1">
+        <input type="number" id="wave-h-val" class="val num-in" value="4">
+      </span>
+      <span class="wave-grp">
+        <label class="lbl">宽</label>
+        <input type="range" id="wave-w" min="20" max="1200" value="400" step="10">
+        <input type="number" id="wave-w-val" class="val num-in" value="400">
+      </span>
+      <span class="wave-grp">
+        <label class="lbl">速</label>
+        <input type="range" id="wave-s" min="0" max="3" value="0.4" step="0.1">
+        <input type="number" id="wave-s-val" class="val num-in" value="0.4">
+      </span>
+    </div>
+  </section>
+
+</div><!-- /两列 -->
+
+<!-- ==================== 第 2 页：随机字幕面板 ==================== -->
+<div id="page-2" class="app-body hidden">
+
+  <!-- ===== 未完成警告：整个第二页还没测过，放在最顶上，横跨两列 ===== -->
+  <div class="wip-banner">
+    <span class="wip-icon">⚠</span>
+    <span class="wip-body">
+      <b>尚未进行测试和完善，请勿使用</b>
+      <span class="wip-sub">这一页的功能还在开发中，效果和时序都未验证。请使用第一页「基础字幕面板」。</span>
+    </span>
+  </div>
+
+  <!-- ===== 画面与文字（置顶） ===== -->
+  <section class="card wide">
+    <div class="card-head">
+      <span class="card-title">画面与文字</span>
+      <button class="btn mini reset" data-reset="7">重置</button>
+    </div>
+
+    <!-- 左边参数、右边实时排版预览 -->
+    <div class="cv-wrap">
+      <div class="cv-fields">
+        <div class="cv-grid">
+          <label class="cv-cell">
+            <span class="cv-lbl">宽度 / px</span>
+            <input type="number" id="cv-w" value="1080" min="1" step="1">
+          </label>
+          <label class="cv-cell">
+            <span class="cv-lbl">高度 / px</span>
+            <input type="number" id="cv-h" value="1080" min="1" step="1">
+          </label>
+
+          <label class="cv-cell">
+            <span class="cv-lbl">帧率 / fps</span>
+            <input type="number" id="cv-fps" value="60" min="1" step="1">
+          </label>
+          <label class="cv-cell">
+            <span class="cv-lbl">第一行字号 / px</span>
+            <input type="number" id="cv-size1" value="100" min="1" step="1">
+          </label>
+
+          <label class="cv-cell">
+            <span class="cv-lbl">第二行字号增量</span>
+            <input type="number" id="cv-size2-delta" value="20" step="1">
+          </label>
+          <label class="cv-cell">
+            <span class="cv-lbl">短句字号增量</span>
+            <input type="number" id="cv-short-delta" value="20" step="1">
+          </label>
+
+          <label class="cv-cell">
+            <span class="cv-lbl">字距</span>
+            <input type="number" id="cv-tracking" value="20" step="1">
+          </label>
+          <label class="cv-cell">
+            <span class="cv-lbl">行距 / px</span>
+            <input type="number" id="cv-leading" value="65" step="1">
+          </label>
+        </div>
+
+        <div class="hint cv-note">
+          2 词及以下：整条字幕字号 = 第一行字号 + 短句字号增量，0 表示使用第一行字号。<br>
+          3 词及以上分成两行时，第二行使用第二行字号增量。
+        </div>
+      </div>
+
+      <div class="cv-preview">
+        <div id="cv-frame" class="cv-frame">
+          <div id="cv-line1" class="cv-line">第一行字幕</div>
+          <div id="cv-line2" class="cv-line">第二行</div>
+        </div>
+        <div id="cv-preview-info" class="cv-info">1080 × 1080 · 60fps</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 随机动画 ===== -->
+  <section class="card wide">
+    <div class="card-head">
+      <span class="card-title">随机动画</span>
+      <button class="btn mini reset" data-reset="8">重置</button>
+    </div>
+
+    <div class="hint" style="margin-top:0;margin-bottom:5px">
+      每条字幕从下面勾选的动画里随机取一个。参数沿用基础页的出入场设置（默认 词 → 词）。
+    </div>
+
+    <div class="anim-picks">
+      <label class="anim-pick">
+        <input type="checkbox" id="ra-fade" checked>
+        <span class="ap-name">淡入淡出</span>
+      </label>
+    </div>
+
+    <div id="ra-hint" class="hint anim-warn"></div>
+  </section>
+
+  <!-- ===== 字幕导入（第 2 页副本，行为独立） ===== -->
+  <section class="card wide">
+    <div class="card-head">
+      <span class="card-title">字幕导入</span>
+      <button class="btn mini reset" data-reset="9">重置</button>
     </div>
     <div class="row">
-      <label class="lbl">速</label>
-      <input type="range" id="wave-s" min="0" max="3" value="0.4" step="0.1">
-      <span id="wave-s-val" class="val">0.4</span>
+      <button id="r-pick-srt" class="btn">选择 SRT</button>
+      <button id="r-import-srt" class="btn primary">确定导入</button>
+      <span id="r-srt-name" class="file-name">未选择</span>
     </div>
-    <div class="hint warn">此功能尚不完善，暂不推荐使用</div>
+    <div class="row">
+      <label class="lbl">分行</label>
+      <input type="range" id="r-linebreak" min="8" max="60" value="35" step="1">
+      <input type="number" id="r-linebreak-val" class="val num-in" value="35">
+      <label class="lbl">延长</label>
+      <input type="number" id="r-extend-frames" class="num-in" value="50" step="1"
+             title="每条字幕的出点往后延长多少帧（0 = 不延长）。按合成帧率自动换算">
+      <span class="unit">帧</span>
+    </div>
+    <div class="row">
+      <label class="chk"><input type="checkbox" id="r-precompose" checked> 预合成</label>
+      <input type="text" id="r-precomp-name" value="字幕" style="width:82px">
+      <label class="chk"><input type="checkbox" id="r-force-upper"> 强制大写</label>
+      <label class="chk"><input type="checkbox" id="r-clean-punct"> 清洗标点</label>
+    </div>
   </section>
+
+  <section class="card wide">
+    <div class="card-head">
+      <span class="card-title">随机字幕</span>
+      <button class="btn mini reset" data-reset="6">重置</button>
+    </div>
+
+    <!-- 这一页不做出入场动画，两行直接静态并排，不用 stack（那样会叠在一起） -->
+    <div class="pv-stage">
+      <div class="pv-col">
+        <span class="pv-lang">EN</span>
+        <div class="pv-line"><span class="pv-text" id="rp-en-1">Random font &amp; color</span></div>
+        <div class="pv-line"><span class="pv-text" id="rp-en-2">Every line looks different</span></div>
+      </div>
+      <div class="pv-col">
+        <span class="pv-lang">中</span>
+        <div class="pv-line"><span class="pv-text" id="rp-cn-1">随机字体与随机颜色</span></div>
+        <div class="pv-line"><span class="pv-text" id="rp-cn-2">每条字幕都不一样</span></div>
+      </div>
+    </div>
+
+    <!-- 随机字体 -->
+    <div class="sub-title">随机字体</div>
+    <div class="row">
+      <button id="r-add-fonts" class="btn mini">+ 添加</button>
+      <button id="r-clear-fonts" class="btn mini">清空</button>
+      <span class="hint">已选 <b id="r-font-count">0</b> 个，每条字幕随机取一个</span>
+    </div>
+    <div id="r-font-list" class="chip-list"></div>
+
+    <!-- 随机颜色 -->
+    <div class="sub-title">随机颜色</div>
+    <div class="row">
+      <button id="r-add-color" class="btn mini">+ 色</button>
+      <button id="r-randomize-colors" class="btn mini">反色</button>
+      <span class="hint">每条字幕取一个，相邻不重复</span>
+    </div>
+    <div id="r-color-list" class="color-list"></div>
+
+    <!-- 发光开关 + 提示：放在颜色调整下面 -->
+    <div class="row" style="margin-top:6px">
+      <label class="chk"><input type="checkbox" id="r-glow-en" checked> 发光</label>
+      <span class="hint" style="flex:1">发光默认开启，参数沿用基础页的设置</span>
+    </div>
+    <div id="r-glow-hint" class="hint glow-hint"></div>
+
+    <!-- 流光：两种效果各自一个开关，全部展开，不再用下拉框折叠 -->
+    <div class="sub-title">流光</div>
+    <div class="flow-cards">
+      <label class="flow-card">
+        <input type="checkbox" id="r-flow-fullwash">
+        <span class="fc-body">
+          <span class="fc-name">全范围晕染留白</span>
+          <span class="fc-desc">文字色打底，多处白色留白同时扫过</span>
+        </span>
+      </label>
+      <label class="flow-card">
+        <input type="checkbox" id="r-flow-ribbon">
+        <span class="fc-body">
+          <span class="fc-name">彩带</span>
+          <span class="fc-desc">斜向条带染色，带纹理的流动感</span>
+        </span>
+      </label>
+      <label class="flow-card">
+        <input type="checkbox" id="r-flow-random">
+        <span class="fc-body">
+          <span class="fc-name">随机</span>
+          <span class="fc-desc">每条字幕从上面勾选的效果里随机取一个</span>
+        </span>
+      </label>
+    </div>
+
+    <div class="row" style="margin-top:6px">
+      <label class="lbl">周期</label>
+      <input type="range" id="r-flow-period" min="1" max="12" value="5" step="0.5">
+      <input type="number" id="r-flow-period-val" class="val num-in" value="5.0">
+      <label class="lbl">留白处数</label>
+      <input type="range" id="r-flow-blank-count" min="2" max="6" value="3" step="1">
+      <input type="number" id="r-flow-blank-count-val" class="val num-in" value="3">
+    </div>
+    <div id="r-flow-hint" class="hint"></div>
+
+    <div class="row" style="margin-top:8px">
+      <button id="r-run-all" class="btn primary" style="flex:1">一键生成随机效果</button>
+    </div>
+  </section>
+</div>
 
   <!-- 执行 -->
   <section class="card sticky">
     <div class="row">
       <label class="chk"><input type="checkbox" id="use-selection"> 仅对选中图层</label>
       <button id="save-cfg" class="btn mini" style="margin-left:auto">保存设置</button>
-      <button id="save-default" class="btn mini" title="把当前所有参数存成默认值，以后重置就回到这套参数">存为默认</button>
+      <button id="save-default" class="btn mini" title="把当前参数另存为一套预设，方便以后一键套用">存为预设</button>
+      <button id="reset-all" class="btn mini" title="把所有参数恢复到出厂默认（出厂默认不可被覆盖）">恢复出厂</button>
       <button id="diag" class="btn mini" title="检查文字动画器是否正常">诊断</button>
-      <button id="diag-shadow" class="btn mini" title="检查投影参数实际值">投影值</button>
+      <button id="diag-timing" class="btn mini" title="打印字幕的原始出点、延长量、出场帧数与实际淡出区间">时序</button>
+      <button id="diag-shadow" class="btn mini" title="检查投影与发光效果链">投影值</button>
+      <button id="diag-glow" class="btn mini" title="列出 Deep Glow 的实际参数名和值（汉化版也能看出问题）">发光值</button>
     </div>
-    <div class="btn-grid">
-      <button id="run-all" class="btn primary">一键生成效果</button>
-      <button id="run-animate" class="btn">应用动画</button>
-      <button id="run-fonts" class="btn">随机字体</button>
-      <button id="run-wave" class="btn">波浪</button>
-      <button id="run-glow" class="btn">发光</button>
-      <button id="run-interlace" class="btn">图层交错</button>
-      <button id="run-adjust" class="btn">调整图层</button>
+    <div id="page1-only" class="page1-only">
+      <div id="param-preset-list" class="chip-list"></div>
+      <div class="btn-grid">
+        <button id="run-all" class="btn primary">一键生成效果</button>
+        <button id="run-animate" class="btn">应用动画</button>
+        <button id="run-fonts" class="btn">随机字体</button>
+        <button id="run-wave" class="btn">波浪</button>
+        <button id="run-glow" class="btn">发光</button>
+        <button id="run-interlace" class="btn">图层交错</button>
+        <button id="run-adjust" class="btn">调整图层</button>
+      </div>
     </div>
+    <!-- 执行进度：只在跑任务时显示 -->
+    <div id="run-progress" class="run-progress hidden">
+      <div class="rp-head">
+        <span id="rp-label">准备中…</span>
+        <span id="rp-count" class="rp-count">0 / 0</span>
+      </div>
+      <div class="rp-track"><div id="rp-bar" class="rp-bar"></div></div>
+    </div>
+
     <div id="status" class="status">就绪</div>
   </section>
-
-  <div class="footer">
-    <span class="credit">Rin字幕效果助手 · 制作人 <b>RinSky123</b></span>
-    <span class="free-tag">此脚本完全免费使用，请勿倒卖</span>
-  </div>
 
 </div>
 

@@ -21,7 +21,33 @@ if (-not (Test-Path $dist)) { New-Item -ItemType Directory -Path $dist | Out-Nul
 $out = Join-Path $dist "RinSubtitleHelper_v$ver.zip"
 if (Test-Path $out) { Remove-Item $out -Force }
 
-Compress-Archive -Path $src -DestinationPath $out -Force
+# 先把要发的内容拷到临时目录，顺手剔除本地测试 / 编辑器残留
+# （_smoketest.html 是 _mk_test.js 生成的面板冒烟测试页，不能进发布包）
+$stage = Join-Path $env:TEMP ("rinpack_" + [System.Guid]::NewGuid().ToString("N"))
+$stageExt = Join-Path $stage "RinSubtitleHelper"
+New-Item -ItemType Directory -Path $stageExt -Force | Out-Null
+
+$excludeNames = @("_smoketest.html", "desktop.ini", "Thumbs.db", ".DS_Store")
+$excludeDirs  = @(".git", ".vscode", ".idea", "__MACOSX")
+
+Get-ChildItem -Recurse -Force -File $src | ForEach-Object {
+    $rel = $_.FullName.Substring($src.Length + 1)
+    $parts = $rel -split '\\'
+    $skip = $false
+    foreach ($p in $parts) {
+        if ($excludeDirs -contains $p) { $skip = $true }
+    }
+    if (-not $skip -and ($excludeNames -contains $_.Name)) { $skip = $true }
+    if ($skip) { Write-Host ("     [跳过] " + $rel) -ForegroundColor DarkGray; return }
+
+    $target = Join-Path $stageExt $rel
+    $targetDir = Split-Path -Parent $target
+    if (-not (Test-Path $targetDir)) { New-Item -ItemType Directory -Path $targetDir -Force | Out-Null }
+    Copy-Item -LiteralPath $_.FullName -Destination $target -Force
+}
+
+Compress-Archive -Path $stageExt -DestinationPath $out -Force
+Remove-Item -LiteralPath $stage -Recurse -Force
 
 Write-Host ""
 Write-Host "  ✅ 打包完成" -ForegroundColor Green
